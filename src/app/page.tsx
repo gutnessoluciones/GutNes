@@ -1755,7 +1755,7 @@ export default function HomePage() {
                 
                 {showSuccessMessage && (
                   <div className="mb-6 p-4 bg-green-500/20 border border-green-500/50 rounded-lg flex items-center gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-400 flex-shrink-0" />
+                    <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
                     <p className="text-green-100 text-sm">¡Mensaje enviado! Te contactaremos pronto.</p>
                   </div>
                 )}
