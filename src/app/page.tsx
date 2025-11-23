@@ -6,6 +6,7 @@ import { motion, useInView, useScroll, useTransform, AnimatePresence } from 'fra
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import logo from '@/images/logo.png';
+import { findBestResponse } from '@/data/chatbotKnowledge';
 import {
   Globe,
   Search,
@@ -46,7 +47,11 @@ import {
   ShoppingCart,
   Image as ImageIcon,
   BookOpen,
-  Layers
+  Layers,
+  Facebook,
+  Twitter,
+  Linkedin,
+  Instagram
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -58,10 +63,11 @@ export default function HomePage() {
   // Chatbot state
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([
-    { type: 'bot', text: '¡Hola! 👋 Soy el asistente virtual de Gutnes. ¿En qué puedo ayudarte hoy?' }
+    { type: 'bot', text: '¡Hola! 👋 Soy el **Asistente Virtual de Gutnes**. Estoy aquí para resolver todas tus dudas sobre nuestros servicios de digitalización, desarrollo web, SEO y consultoría tecnológica.\n\n💡 **Puedes preguntarme sobre:**\n• Nuestros servicios y soluciones\n• Precios y presupuestos\n• Plazos de entrega\n• Casos de éxito\n• Y mucho más...\n\n¿En qué puedo ayudarte?' }
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const chatMessagesEndRef = useRef<HTMLDivElement>(null);
 
   // Website Visualizer state
   const [isVisualizerOpen, setIsVisualizerOpen] = useState(false);
@@ -101,8 +107,10 @@ export default function HomePage() {
 
   // Floating navigation state
   const [showFloatingNav, setShowFloatingNav] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const handleScroll = () => {
       setShowFloatingNav(window.scrollY > 500);
     };
@@ -114,30 +122,32 @@ export default function HomePage() {
     {
       icon: Cloud,
       title: "Digitalización Empresarial",
-      description: "Transformamos procesos tradicionales en soluciones digitales eficientes, optimizando la productividad y reduciendo costos operativos",
-      features: ["Automatización de procesos", "Cloud Computing", "Gestión documental digital"],
-      price: 2500
+      description: "Visitamos tu empresas y auditamos todos los procesos que se realizan en el día a día, estudiamos y dada nuestra experiencia te ofrecemos soluciones para automatizar y dar una solución eficiente, te acompañamos en el proceso de cambio hacia una empresa más eficiente y aumentamos tu competitividad",
+      features: ["Automatización de procesos", "Cloud Computing", "Gestión documental digital"]
     },
     {
       icon: Shield,
       title: "Auditoría Informática",
-      description: "Evaluación completa de infraestructura IT para identificar vulnerabilidades y oportunidades de mejora en seguridad y eficiencia",
-      features: ["Análisis de seguridad", "Evaluación de infraestructura", "Recomendaciones estratégicas"],
-      price: 1800
+      description: "Evaluación completa de infraestructura IT para identificar vulnerabilidades y oportunidades de mejora en seguridad y eficiencia. Deja que la informática trabaje para ti y no al revés",
+      features: ["Análisis de seguridad", "Evaluación de infraestructura", "Recomendaciones estratégicas"]
     },
     {
       icon: Code,
       title: "Desarrollo Web",
       description: "Diseño y desarrollo de sitios web modernos, responsivos y optimizados con las últimas tecnologías del mercado",
-      features: ["Next.js & React", "Diseño responsive", "Performance optimizada"],
-      price: 3500
+      features: ["Next.js & React", "Diseño responsive", "Performance optimizada"]
     },
     {
       icon: Search,
       title: "Posicionamiento SEO",
-      description: "Estrategias de optimización para mejorar la visibilidad en buscadores y atraer tráfico cualificado a tu negocio",
-      features: ["SEO On-Page", "Link Building", "Análisis de competencia"],
-      price: 1200
+      description: "Estrategias de optimización para mejorar la visibilidad en buscadores y atraer tráfico cualificado a tu negocio. Posiciona tu negocio donde merece estar",
+      features: ["SEO On-Page", "Link Building", "Análisis de competencia"]
+    },
+    {
+      icon: Settings,
+      title: "Mantenimiento y Soporte IT",
+      description: "Gestión continua de tus tecnologías con actualizaciones, monitoreo proactivo y mejoras de seguridad. Protegemos tu infraestructura mientras tú te enfocas en tu negocio",
+      features: ["Soporte técnico 24/7", "Actualizaciones de sistemas", "Mejoras de seguridad"]
     }
   ];
 
@@ -146,22 +156,7 @@ export default function HomePage() {
       name: "Polvero el Vivo",
       category: "Construcción",
       description: "Landing page moderna para almacén de materiales de construcción con más de 60 años de experiencia",
-      image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&q=80",
-      tech: ["Next.js", "Tailwind CSS", "Framer Motion"]
-    },
-    {
-      name: "Portal Empleados",
-      category: "Gestión Interna",
-      description: "Sistema completo de gestión de vacaciones, nóminas y solicitudes para empresas",
-      image: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&q=80",
-      tech: ["React", "TypeScript", "shadcn/ui"]
-    },
-    {
-      name: "E-commerce Retail",
-      category: "Comercio Electrónico",
-      description: "Tienda online completa con pasarela de pagos y gestión de inventario en tiempo real",
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
-      tech: ["Next.js", "Stripe", "PostgreSQL"]
+      image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&q=80"
     }
   ];
 
@@ -223,37 +218,50 @@ export default function HomePage() {
     { value: "24/7", label: "Atención Directa" }
   ];
 
-  // Chatbot responses
+  // Chatbot responses - 16 preguntas principales
   const quickResponses = [
+    "¿Quiénes sois?",
     "¿Qué servicios ofrecéis?",
-    "¿Cuánto cuesta un proyecto web?",
-    "¿Cuánto tarda un proyecto?",
-    "Quiero un presupuesto"
+    "¿Cuánto cuesta?",
+    "¿Cuánto tarda?",
+    "¿Cómo contacto?",
+    "¿Dónde estáis?",
+    "Casos de éxito",
+    "¿Qué incluye el servicio?",
+    "¿Ofrecéis garantías?",
+    "¿Qué tecnologías usáis?",
+    "¿Dais mantenimiento?",
+    "¿Por qué Gutnes?",
+    "¿Qué sectores trabajáis?",
+    "¿Hacéis SEO?",
+    "¿Hacéis webs?",
+    "Quiero presupuesto"
   ];
 
   const handleSendMessage = () => {
     if (!inputMessage.trim()) return;
 
     setChatMessages(prev => [...prev, { type: 'user', text: inputMessage }]);
+    const userMsg = inputMessage;
     setInputMessage('');
     setIsTyping(true);
 
+    // Auto-scroll al final
     setTimeout(() => {
-      let botResponse = '';
-      const msg = inputMessage.toLowerCase();
+      chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
 
-      if (msg.includes('servicio') || msg.includes('ofrecéis')) {
-        botResponse = 'Ofrecemos Digitalización Empresarial, Auditoría Informática, Desarrollo Web y Posicionamiento SEO. ¿Te interesa alguno en particular?';
-      } else if (msg.includes('precio') || msg.includes('cuesta') || msg.includes('presupuesto')) {
-        botResponse = '💰 Los precios varían según el proyecto. Usa nuestra calculadora o contáctanos para un presupuesto personalizado sin compromiso.';
-      } else if (msg.includes('tiempo') || msg.includes('tarda')) {
-        botResponse = '⏱️ Normalmente entre 4-8 semanas dependiendo de la complejidad. Te entregamos un cronograma detallado en la fase de planificación.';
-      } else {
-        botResponse = '¡Gracias por tu mensaje! Un especialista te contactará pronto. También puedes escribirnos a hola@gutnes.com o usar nuestra calculadora de presupuestos.';
-      }
+    setTimeout(() => {
+      // Usar el sistema de IA del archivo chatbotKnowledge
+      const botResponse = findBestResponse(userMsg);
 
       setIsTyping(false);
       setChatMessages(prev => [...prev, { type: 'bot', text: botResponse }]);
+      
+      // Auto-scroll después de la respuesta
+      setTimeout(() => {
+        chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
     }, 1500);
   };
 
@@ -426,20 +434,22 @@ export default function HomePage() {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsChatOpen(!isChatOpen)}
-          className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-4 rounded-full shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-110"
+          className="fixed bottom-6 right-6 z-50 bg-linear-to-r from-blue-600 to-cyan-500 text-white p-4 rounded-full shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-110"
         >
           <MessageCircle className="h-6 w-6" />
         </motion.button>
 
-        {/* Visualizer Floating Button */}
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setIsVisualizerOpen(!isVisualizerOpen)}
-          className="fixed bottom-24 right-6 z-50 bg-gradient-to-r from-amber-500 to-orange-600 text-white p-4 rounded-full shadow-2xl hover:shadow-amber-500/50 transition-all duration-300 hover:scale-110"
-        >
-          <Monitor className="h-6 w-6" />
-        </motion.button>
+        {/* Visualizer Floating Button - OCULTO TEMPORALMENTE */}
+        {false && (
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsVisualizerOpen(!isVisualizerOpen)}
+            className="fixed bottom-24 right-6 z-50 bg-linear-to-r from-amber-500 to-orange-600 text-white p-4 rounded-full shadow-2xl hover:shadow-amber-500/50 transition-all duration-300 hover:scale-110"
+          >
+            <Monitor className="h-6 w-6" />
+          </motion.button>
+        )}
 
         {/* Chatbot Widget */}
         <AnimatePresence>
@@ -450,16 +460,16 @@ export default function HomePage() {
               exit={{ opacity: 0, y: 100, scale: 0.8 }}
               className="fixed bottom-32 right-6 z-50 w-96 max-w-[calc(100vw-3rem)]"
             >
-              <Card className="shadow-2xl border-2 border-cyan-200">
-                <div className="bg-gradient-to-r from-cyan-500 to-blue-600 p-4 text-white">
+              <Card className="shadow-2xl border-2 border-blue-200">
+                <div className="bg-linear-to-r from-blue-600 to-cyan-500 p-4 text-white">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-3">
-                      <div className="bg-white/20 p-2 rounded-full">
-                        <MessageCircle className="h-5 w-5" />
+                      <div className="bg-white p-2 rounded-lg">
+                        <Image src={logo} alt="Gutnes" width={32} height={32} className="w-8 h-8" />
                       </div>
                       <div>
-                        <h3 className="font-bold">Asistente Virtual</h3>
-                        <p className="text-xs text-cyan-100">En línea</p>
+                        <h3 className="font-bold text-lg">Asistente Virtual Gutnes</h3>
+                        <p className="text-xs text-blue-100">En línea • Respuesta inmediata</p>
                       </div>
                     </div>
                     <button
@@ -471,43 +481,47 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <div className="h-96 overflow-y-auto p-4 bg-slate-50">
+                <div className="h-96 overflow-y-auto p-4 bg-linear-to-b from-slate-50 to-white">
                   {chatMessages.map((msg: any, idx: number) => (
                     <div
                       key={idx}
                       className={`mb-3 flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-[80%] p-3 rounded-lg ${
+                        className={`max-w-[80%] p-3 rounded-lg shadow-sm ${
                           msg.type === 'user'
-                            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white'
-                            : 'bg-white border border-slate-200 text-slate-800'
+                            ? 'bg-linear-to-r from-blue-600 to-cyan-500 text-white'
+                            : 'bg-white border border-blue-100 text-slate-800'
                         }`}
                       >
-                        <p className="text-sm">{msg.text}</p>
+                        <p className="text-sm whitespace-pre-line">{msg.text}</p>
                       </div>
                     </div>
                   ))}
                   {isTyping && (
                     <div className="flex justify-start mb-3">
-                      <div className="bg-white border border-slate-200 p-3 rounded-lg">
+                      <div className="bg-white border border-blue-100 p-3 rounded-lg shadow-sm">
                         <div className="flex gap-1">
-                          <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" />
-                          <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-100" />
-                          <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-200" />
+                          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" />
+                          <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce delay-100" />
+                          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce delay-200" />
                         </div>
                       </div>
                     </div>
                   )}
+                  <div ref={chatMessagesEndRef} />
                 </div>
 
                 <div className="p-4 bg-white border-t">
-                  <div className="mb-2 flex gap-2 flex-wrap">
-                    {['Servicios', '¿Precios?', 'Contacto'].map((response) => (
+                  <div className="mb-2 flex gap-2 flex-wrap max-h-32 overflow-y-auto">
+                    {quickResponses.map((response) => (
                       <button
                         key={response}
-                        onClick={() => handleQuickResponse(response)}
-                        className="px-3 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded-full transition-colors"
+                        onClick={() => {
+                          setInputMessage(response);
+                          handleSendMessage();
+                        }}
+                        className="px-3 py-1 text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 rounded-full transition-colors border border-blue-200"
                       >
                         {response}
                       </button>
@@ -521,12 +535,12 @@ export default function HomePage() {
                       onChange={(e) => setInputMessage(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                       placeholder="Escribe tu mensaje..."
-                      className="flex-1 p-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-sm"
+                      className="flex-1 p-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     />
                     <Button
                       onClick={handleSendMessage}
                       size="sm"
-                      className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
+                      className="bg-linear-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600"
                     >
                       <Send className="h-4 w-4" />
                     </Button>
@@ -548,7 +562,7 @@ export default function HomePage() {
             >
               <div className="bg-white rounded-2xl shadow-2xl border-2 border-amber-200 overflow-hidden max-w-6xl w-full max-h-[90vh] flex flex-col">
                 {/* Visualizer Header */}
-                <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-4 text-white flex justify-between items-center">
+                <div className="bg-linear-to-r from-amber-500 to-orange-600 p-4 text-white flex justify-between items-center">
                   <div className="flex items-center gap-3">
                     <div className="bg-white/20 p-2 rounded-full">
                       <Monitor className="h-5 w-5" />
@@ -664,7 +678,7 @@ export default function HomePage() {
                   </div>
 
                   {/* Preview Area with Device Frame */}
-                  <div className="flex-1 p-8 bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col items-center justify-center">
+                  <div className="flex-1 p-8 bg-linear-to-br from-slate-50 to-slate-100 flex flex-col items-center justify-center">
                     <div className="text-center mb-6">
                       <h3 className="text-lg font-bold text-slate-800 mb-2">Vista Previa</h3>
                       <p className="text-sm text-slate-600">
@@ -685,7 +699,7 @@ export default function HomePage() {
                             {/* Screen */}
                             <div className="relative bg-white rounded-[2.5rem] overflow-hidden" style={{ width: '280px', height: '560px' }}>
                               {/* Mini Content Preview */}
-                              <div className={`h-full bg-gradient-to-br ${webTypes.find(t => t.id === tempTheme)?.colors.bg} p-4 overflow-hidden`}>
+                              <div className={`h-full bg-linear-to-br ${webTypes.find(t => t.id === tempTheme)?.colors.bg} p-4 overflow-hidden`}>
                                 <div className="flex items-center justify-center h-full">
                                   {pageTypes.find(p => p.id === tempPageType)?.icon && 
                                     React.createElement(pageTypes.find(p => p.id === tempPageType)!.icon, { 
@@ -706,11 +720,11 @@ export default function HomePage() {
                       {tempDevice === 'tablet' && (
                         <div className="relative">
                           {/* iPad Shell */}
-                          <div className="relative bg-slate-900 rounded-[2rem] p-3 shadow-2xl">
+                          <div className="relative bg-slate-900 rounded-4xl p-3 shadow-2xl">
                             {/* Screen */}
-                            <div className="relative bg-white rounded-[1.5rem] overflow-hidden" style={{ width: '480px', height: '640px' }}>
+                            <div className="relative bg-white rounded-3xl overflow-hidden" style={{ width: '480px', height: '640px' }}>
                               {/* Mini Content Preview */}
-                              <div className={`h-full bg-gradient-to-br ${webTypes.find(t => t.id === tempTheme)?.colors.bg} p-6 overflow-hidden`}>
+                              <div className={`h-full bg-linear-to-br ${webTypes.find(t => t.id === tempTheme)?.colors.bg} p-6 overflow-hidden`}>
                                 <div className="flex items-center justify-center h-full">
                                   {pageTypes.find(p => p.id === tempPageType)?.icon && 
                                     React.createElement(pageTypes.find(p => p.id === tempPageType)!.icon, { 
@@ -738,7 +752,7 @@ export default function HomePage() {
                             {/* Screen */}
                             <div className="relative bg-white rounded-lg overflow-hidden" style={{ width: '600px', height: '380px' }}>
                               {/* Mini Content Preview */}
-                              <div className={`h-full bg-gradient-to-br ${webTypes.find(t => t.id === tempTheme)?.colors.bg} p-8 overflow-hidden`}>
+                              <div className={`h-full bg-linear-to-br ${webTypes.find(t => t.id === tempTheme)?.colors.bg} p-8 overflow-hidden`}>
                                 <div className="flex items-center justify-center h-full">
                                   {pageTypes.find(p => p.id === tempPageType)?.icon && 
                                     React.createElement(pageTypes.find(p => p.id === tempPageType)!.icon, { 
@@ -751,7 +765,7 @@ export default function HomePage() {
                           </div>
 
                           {/* MacBook Base */}
-                          <div className="relative h-2 bg-gradient-to-b from-slate-300 to-slate-400 rounded-b-xl shadow-lg" style={{ width: '640px', marginLeft: '-20px' }}>
+                          <div className="relative h-2 bg-linear-to-b from-slate-300 to-slate-400 rounded-b-xl shadow-lg" style={{ width: '640px', marginLeft: '-20px' }}>
                             <div className="absolute inset-0 flex items-center justify-center">
                               <div className="w-16 h-1 bg-slate-500/30 rounded-full"></div>
                             </div>
@@ -776,8 +790,8 @@ export default function HomePage() {
                         </div>
                         
                         <div className="flex gap-2 mb-3">
-                          <div className={`flex-1 h-8 rounded bg-gradient-to-r ${webTypes.find(t => t.id === tempTheme)?.colors.primary}`} />
-                          <div className={`flex-1 h-8 rounded bg-gradient-to-r ${webTypes.find(t => t.id === tempTheme)?.colors.secondary}`} />
+                          <div className={`flex-1 h-8 rounded bg-linear-to-r ${webTypes.find(t => t.id === tempTheme)?.colors.primary}`} />
+                          <div className={`flex-1 h-8 rounded bg-linear-to-r ${webTypes.find(t => t.id === tempTheme)?.colors.secondary}`} />
                         </div>
 
                         <p className="text-xs text-slate-600">
@@ -812,7 +826,7 @@ export default function HomePage() {
                       Cancelar
                     </Button>
                     <Button
-                      className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
+                      className="bg-linear-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
                       onClick={applyTheme}
                     >
                       <Sparkles className="mr-2 h-4 w-4" />
@@ -891,123 +905,6 @@ export default function HomePage() {
         )}
       </AnimatePresence>
 
-      {/* Chatbot Floating Button */}
-      <motion.button
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 1 }}
-        onClick={() => setIsChatOpen(!isChatOpen)}
-        className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-4 rounded-full shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-110"
-      >
-        {isChatOpen ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
-      </motion.button>
-
-      {/* Website Visualizer Floating Button */}
-      <motion.button
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 1.2 }}
-        onClick={() => setIsVisualizerOpen(!isVisualizerOpen)}
-        className="fixed bottom-24 right-6 z-50 bg-gradient-to-r from-amber-500 to-orange-600 text-white p-4 rounded-full shadow-2xl hover:shadow-amber-500/50 transition-all duration-300 hover:scale-110"
-        title="Visualizador de Proyectos"
-      >
-        {isVisualizerOpen ? <X className="h-6 w-6" /> : <Monitor className="h-6 w-6" />}
-      </motion.button>
-
-      {/* Chatbot Widget */}
-      <AnimatePresence>
-        {isChatOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 100, scale: 0.8 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 100, scale: 0.8 }}
-            className="fixed bottom-24 right-6 z-50 w-96 max-w-[calc(100vw-3rem)]"
-          >
-            <Card className="bg-white shadow-2xl border-2 border-cyan-200 overflow-hidden">
-              {/* Chat Header */}
-              <div className="bg-gradient-to-r from-cyan-500 to-blue-600 p-4 text-white">
-                <div className="flex items-center gap-3">
-                  <div className="bg-white/20 p-2 rounded-full">
-                    <MessageCircle className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold">Asistente Gutnes</h3>
-                    <p className="text-xs text-cyan-100">Online · Responde en minutos</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Chat Messages */}
-              <div className="h-96 overflow-y-auto p-4 space-y-3 bg-slate-50">
-                {chatMessages.map((msg, idx) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[80%] p-3 rounded-2xl ${
-                        msg.type === 'user'
-                          ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white'
-                          : 'bg-white text-slate-800 shadow-sm'
-                      }`}
-                    >
-                      <p className="text-sm">{msg.text}</p>
-                    </div>
-                  </motion.div>
-                ))}
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="bg-white p-3 rounded-2xl shadow-sm">
-                      <div className="flex gap-1">
-                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" />
-                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-100" />
-                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-200" />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Quick Responses */}
-              <div className="p-3 bg-white border-t flex flex-wrap gap-2">
-                {quickResponses.map((response, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleQuickResponse(response)}
-                    className="text-xs bg-slate-100 hover:bg-cyan-100 text-slate-700 px-3 py-1 rounded-full transition-colors"
-                  >
-                    {response}
-                  </button>
-                ))}
-              </div>
-
-              {/* Chat Input */}
-              <div className="p-4 bg-white border-t">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                    placeholder="Escribe tu mensaje..."
-                    className="flex-1 p-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-sm"
-                  />
-                  <Button
-                    onClick={handleSendMessage}
-                    size="sm"
-                    className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Website Visualizer Widget */}
       <AnimatePresence>
         {isVisualizerOpen && (
@@ -1019,7 +916,7 @@ export default function HomePage() {
           >
             <div className="bg-white rounded-2xl shadow-2xl border-2 border-amber-200 overflow-hidden max-w-6xl w-full max-h-[90vh] flex flex-col">
               {/* Visualizer Header */}
-              <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-4 text-white flex justify-between items-center">
+              <div className="bg-linear-to-r from-amber-500 to-orange-600 p-4 text-white flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   <div className="bg-white/20 p-2 rounded-full">
                     <Monitor className="h-5 w-5" />
@@ -1135,7 +1032,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Preview Area with Device Frame */}
-                <div className="flex-1 p-8 bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col items-center justify-center">
+                <div className="flex-1 p-8 bg-linear-to-br from-slate-50 to-slate-100 flex flex-col items-center justify-center">
                   <div className="text-center mb-6">
                     <h3 className="text-lg font-bold text-slate-800 mb-2">Vista Previa</h3>
                     <p className="text-sm text-slate-600">
@@ -1156,7 +1053,7 @@ export default function HomePage() {
                           {/* Screen */}
                           <div className="relative bg-white rounded-[2.5rem] overflow-hidden" style={{ width: '280px', height: '560px' }}>
                             {/* Mini Content Preview */}
-                            <div className={`h-full bg-gradient-to-br ${webTypes.find(t => t.id === tempTheme)?.colors.bg} p-4 overflow-hidden`}>
+                            <div className={`h-full bg-linear-to-br ${webTypes.find(t => t.id === tempTheme)?.colors.bg} p-4 overflow-hidden`}>
                               <div className="flex items-center justify-center h-full">
                                 {pageTypes.find(p => p.id === tempPageType)?.icon && 
                                   React.createElement(pageTypes.find(p => p.id === tempPageType)!.icon, { 
@@ -1177,11 +1074,11 @@ export default function HomePage() {
                     {tempDevice === 'tablet' && (
                       <div className="relative">
                         {/* iPad Shell */}
-                        <div className="relative bg-slate-900 rounded-[2rem] p-3 shadow-2xl">
+                        <div className="relative bg-slate-900 rounded-4xl p-3 shadow-2xl">
                           {/* Screen */}
-                          <div className="relative bg-white rounded-[1.5rem] overflow-hidden" style={{ width: '480px', height: '640px' }}>
+                          <div className="relative bg-white rounded-3xl overflow-hidden" style={{ width: '480px', height: '640px' }}>
                             {/* Mini Content Preview */}
-                            <div className={`h-full bg-gradient-to-br ${webTypes.find(t => t.id === tempTheme)?.colors.bg} p-6 overflow-hidden`}>
+                            <div className={`h-full bg-linear-to-br ${webTypes.find(t => t.id === tempTheme)?.colors.bg} p-6 overflow-hidden`}>
                               <div className="flex items-center justify-center h-full">
                                 {pageTypes.find(p => p.id === tempPageType)?.icon && 
                                   React.createElement(pageTypes.find(p => p.id === tempPageType)!.icon, { 
@@ -1209,7 +1106,7 @@ export default function HomePage() {
                           {/* Screen */}
                           <div className="relative bg-white rounded-lg overflow-hidden" style={{ width: '600px', height: '380px' }}>
                             {/* Mini Content Preview */}
-                            <div className={`h-full bg-gradient-to-br ${webTypes.find(t => t.id === tempTheme)?.colors.bg} p-8 overflow-hidden`}>
+                            <div className={`h-full bg-linear-to-br ${webTypes.find(t => t.id === tempTheme)?.colors.bg} p-8 overflow-hidden`}>
                               <div className="flex items-center justify-center h-full">
                                 {pageTypes.find(p => p.id === tempPageType)?.icon && 
                                   React.createElement(pageTypes.find(p => p.id === tempPageType)!.icon, { 
@@ -1222,7 +1119,7 @@ export default function HomePage() {
                         </div>
 
                         {/* MacBook Base */}
-                        <div className="relative h-2 bg-gradient-to-b from-slate-300 to-slate-400 rounded-b-xl shadow-lg" style={{ width: '640px', marginLeft: '-20px' }}>
+                        <div className="relative h-2 bg-linear-to-b from-slate-300 to-slate-400 rounded-b-xl shadow-lg" style={{ width: '640px', marginLeft: '-20px' }}>
                           <div className="absolute inset-0 flex items-center justify-center">
                             <div className="w-16 h-1 bg-slate-500/30 rounded-full"></div>
                           </div>
@@ -1247,8 +1144,8 @@ export default function HomePage() {
                       </div>
                       
                       <div className="flex gap-2 mb-3">
-                        <div className={`flex-1 h-8 rounded bg-gradient-to-r ${webTypes.find(t => t.id === tempTheme)?.colors.primary}`} />
-                        <div className={`flex-1 h-8 rounded bg-gradient-to-r ${webTypes.find(t => t.id === tempTheme)?.colors.secondary}`} />
+                        <div className={`flex-1 h-8 rounded bg-linear-to-r ${webTypes.find(t => t.id === tempTheme)?.colors.primary}`} />
+                        <div className={`flex-1 h-8 rounded bg-linear-to-r ${webTypes.find(t => t.id === tempTheme)?.colors.secondary}`} />
                       </div>
 
                       <p className="text-xs text-slate-600">
@@ -1283,7 +1180,7 @@ export default function HomePage() {
                     Cancelar
                   </Button>
                   <Button
-                    className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
+                    className="bg-linear-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
                     onClick={applyTheme}
                   >
                     <Sparkles className="mr-2 h-4 w-4" />
@@ -1300,7 +1197,7 @@ export default function HomePage() {
       <motion.section
         ref={heroRef}
         style={{ opacity, scale }}
-        className={`relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br ${theme.colors.bg} transition-colors duration-1000`}
+        className={`relative min-h-screen flex items-center justify-center overflow-hidden bg-linear-to-br ${theme.colors.bg} transition-colors duration-1000`}
       >
         {/* Animated Background Grid */}
         <div className="absolute inset-0 overflow-hidden">
@@ -1321,29 +1218,31 @@ export default function HomePage() {
         </div>
 
         {/* Floating particles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(20)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 bg-amber-400 rounded-full"
-              initial={{
-                x: typeof window !== 'undefined' ? Math.random() * window.innerWidth : Math.random() * 1920,
-                y: typeof window !== 'undefined' ? Math.random() * window.innerHeight : Math.random() * 1080,
-                opacity: 0
-              }}
-              animate={{
-                y: [null, Math.random() * -500],
-                opacity: [0, 1, 0]
-              }}
-              transition={{
-                duration: Math.random() * 3 + 2,
-                repeat: Infinity,
-                delay: Math.random() * 2,
-                ease: "linear"
-              }}
-            />
-          ))}
-        </div>
+        {isMounted && (
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(20)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-1 h-1 bg-amber-400 rounded-full"
+                initial={{
+                  x: Math.random() * window.innerWidth,
+                  y: Math.random() * window.innerHeight,
+                  opacity: 0
+                }}
+                animate={{
+                  y: [null, Math.random() * -500],
+                  opacity: [0, 1, 0]
+                }}
+                transition={{
+                  duration: Math.random() * 3 + 2,
+                  repeat: Infinity,
+                  delay: Math.random() * 2,
+                  ease: "linear"
+                }}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Hero Content */}
         <div className="relative z-10 container mx-auto px-4 py-20">
@@ -1468,7 +1367,7 @@ export default function HomePage() {
               className="text-5xl md:text-7xl lg:text-8xl font-bold mb-4 leading-tight"
             >
               <motion.span 
-                className={`bg-gradient-to-r ${theme.colors.primary} bg-clip-text text-transparent inline-block transition-all duration-1000`}
+                className={`bg-linear-to-r ${theme.colors.primary} bg-clip-text text-transparent inline-block transition-all duration-1000`}
                 animate={{
                   backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
                 }}
@@ -1509,7 +1408,7 @@ export default function HomePage() {
             >
               <Button
                 size="lg"
-                className={`bg-gradient-to-r ${theme.colors.secondary} hover:opacity-90 text-white font-semibold text-lg px-10 py-7 transition-all duration-1000`}
+                className={`bg-linear-to-r ${theme.colors.secondary} hover:opacity-90 text-white font-semibold text-lg px-10 py-7 transition-all duration-1000`}
                 onClick={() => document.getElementById('contacto')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <Sparkles className="mr-2 h-5 w-5" />
@@ -1562,7 +1461,7 @@ export default function HomePage() {
           <AnimatedContent>
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-                Nuestros <span className="bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-700 bg-clip-text text-transparent">Servicios</span>
+                Nuestros <span className="bg-linear-to-r from-amber-600 via-yellow-600 to-amber-700 bg-clip-text text-transparent">Servicios</span>
               </h2>
               <p className="text-xl text-slate-600 max-w-3xl mx-auto">
                 Soluciones tecnológicas completas adaptadas a las necesidades específicas de tu empresa
@@ -1570,11 +1469,11 @@ export default function HomePage() {
             </div>
           </AnimatedContent>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {services.map((service, index) => (
               <AnimatedCard key={index} delay={index * 0.1}>
                 <Card className="p-8 h-full hover:shadow-2xl transition-all duration-300 border-2 hover:border-amber-400 group">
-                  <div className="bg-gradient-to-br from-slate-800 to-slate-900 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
+                  <div className="bg-linear-to-br from-slate-800 to-slate-900 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
                     <service.icon className="h-8 w-8 text-amber-400" />
                   </div>
                   <h3 className="text-2xl font-bold text-slate-900 mb-4">{service.title}</h3>
@@ -1587,10 +1486,6 @@ export default function HomePage() {
                       </li>
                     ))}
                   </ul>
-                  <div className="mt-6 pt-6 border-t">
-                    <p className="text-sm text-slate-500">Desde</p>
-                    <p className="text-3xl font-bold text-cyan-600">{service.price}€</p>
-                  </div>
                 </Card>
               </AnimatedCard>
             ))}
@@ -1604,7 +1499,7 @@ export default function HomePage() {
           <AnimatedContent>
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-                Casos de <span className="bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-700 bg-clip-text text-transparent">Éxito</span>
+                Casos de <span className="bg-linear-to-r from-amber-600 via-yellow-600 to-amber-700 bg-clip-text text-transparent">Éxito</span>
               </h2>
               <p className="text-xl text-slate-600 max-w-3xl mx-auto">
                 Proyectos reales que demuestran nuestra capacidad y compromiso con la excelencia
@@ -1612,7 +1507,7 @@ export default function HomePage() {
             </div>
           </AnimatedContent>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
             {portafolio.map((project, index) => (
               <AnimatedCard key={index} delay={index * 0.15}>
                 <Card className="overflow-hidden h-full hover:shadow-2xl transition-all duration-300 group">
@@ -1624,24 +1519,14 @@ export default function HomePage() {
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-slate-900/80 to-transparent" />
                     <div className="absolute bottom-4 left-4">
-                      <span className="px-3 py-1 bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-900 text-sm font-bold rounded-full shadow-lg">
+                      <span className="px-3 py-1 bg-linear-to-r from-amber-500 to-yellow-500 text-slate-900 text-sm font-bold rounded-full shadow-lg">
                         {project.category}
                       </span>
                     </div>
                   </div>
                   <div className="p-6">
                     <h3 className="text-xl font-bold text-slate-900 mb-2">{project.name}</h3>
-                    <p className="text-slate-600 mb-4">{project.description}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {project.tech.map((tech, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded"
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
+                    <p className="text-slate-600">{project.description}</p>
                   </div>
                 </Card>
               </AnimatedCard>
@@ -1679,32 +1564,81 @@ export default function HomePage() {
           <AnimatedContent>
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-                Lo que dicen <span className="bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-700 bg-clip-text text-transparent">nuestros Clientes</span>
+                ¿Has trabajado <span className="bg-linear-to-r from-amber-600 via-yellow-600 to-amber-700 bg-clip-text text-transparent">con nosotros?</span>
               </h2>
               <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-                La satisfacción de nuestros clientes es nuestro mayor logro
+                Tu opinión nos ayuda a mejorar. Comparte tu experiencia trabajando con GutNes Digital
               </p>
             </div>
           </AnimatedContent>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <AnimatedCard key={index} delay={index * 0.1}>
-                <Card className="p-8 h-full hover:shadow-2xl transition-all duration-300 border-2 hover:border-amber-400">
-                  <div className="flex gap-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                    ))}
+          <div className="max-w-2xl mx-auto">
+            <AnimatedCard delay={0.2}>
+              <Card className="p-8 shadow-2xl border-2 border-amber-200">
+                <form className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">
+                      Tu Nombre *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ej: María González"
+                      className="w-full p-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    />
                   </div>
-                  <p className="text-slate-700 mb-6 italic">&ldquo;{testimonial.content}&rdquo;</p>
-                  <div className="border-t pt-4">
-                    <div className="font-bold text-slate-900">{testimonial.name}</div>
-                    <div className="text-sm text-slate-600">{testimonial.role}</div>
-                    <div className="text-sm text-amber-600 font-semibold">{testimonial.company}</div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">
+                      Empresa / Cargo
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ej: CEO en TechCorp"
+                      className="w-full p-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    />
                   </div>
-                </Card>
-              </AnimatedCard>
-            ))}
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">
+                      Tu Experiencia *
+                    </label>
+                    <textarea
+                      required
+                      rows={5}
+                      placeholder="Cuéntanos sobre tu experiencia trabajando con nosotros..."
+                      className="w-full p-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-900 mb-3">
+                      Calificación
+                    </label>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((rating) => (
+                        <button
+                          key={rating}
+                          type="button"
+                          className="hover:scale-110 transition-transform"
+                        >
+                          <Star className="h-8 w-8 text-slate-300 hover:text-yellow-400 hover:fill-yellow-400" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Button className="w-full bg-linear-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-900 font-bold text-lg py-6 shadow-xl shadow-amber-500/30">
+                    <MessageSquare className="h-5 w-5 mr-2" />
+                    Enviar Testimonio
+                  </Button>
+
+                  <p className="text-xs text-slate-500 text-center">
+                    Tu testimonio será revisado antes de publicarse en nuestra web
+                  </p>
+                </form>
+              </Card>
+            </AnimatedCard>
           </div>
         </div>
       </Section>
@@ -1729,8 +1663,8 @@ export default function HomePage() {
                     </div>
                     <div>
                       <div className="font-semibold">Email</div>
-                      <a href="mailto:hola@gutnes.com" className="text-gray-300 hover:text-amber-400 transition-colors">
-                        hola@gutnes.com
+                      <a href="mailto:info@gutnes.es" className="text-gray-300 hover:text-amber-400 transition-colors">
+                        info@gutnes.es
                       </a>
                     </div>
                   </div>
@@ -1741,9 +1675,25 @@ export default function HomePage() {
                     </div>
                     <div>
                       <div className="font-semibold">Teléfono</div>
-                      <a href="tel:+34900123456" className="text-gray-300 hover:text-amber-400 transition-colors">
-                        +34 900 123 456
-                      </a>
+                      <div className="space-y-1">
+                        <a href="tel:+34618024192" className="text-gray-300 hover:text-amber-400 transition-colors block">
+                          +34 618 024 192
+                        </a>
+                        <a href="tel:+34685579928" className="text-gray-300 hover:text-amber-400 transition-colors block">
+                          +34 685 579 928
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="bg-amber-500/20 p-3 rounded-lg">
+                      <MapPin className="h-6 w-6 text-amber-400" />
+                    </div>
+                    <div>
+                      <div className="font-semibold">Ubicación</div>
+                      <div className="text-gray-300">Avenida Antonio Mairena 18</div>
+                      <div className="text-gray-300">Alcalá de Guadaíra, Sevilla</div>
                     </div>
                   </div>
 
@@ -1752,8 +1702,8 @@ export default function HomePage() {
                       <Clock className="h-6 w-6 text-amber-400" />
                     </div>
                     <div>
-                      <div className="font-semibold">Horario</div>
-                      <div className="text-gray-300">Lunes a Viernes: 9:00 - 18:00</div>
+                      <div className="font-semibold">Disponibilidad</div>
+                      <div className="text-gray-300">24/7 - Respuesta en 24-48h</div>
                     </div>
                   </div>
                 </div>
@@ -1798,7 +1748,7 @@ export default function HomePage() {
                       placeholder="Cuéntanos sobre tu proyecto..."
                     />
                   </div>
-                  <Button className="w-full bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-900 font-bold text-lg py-6 shadow-xl shadow-amber-500/30">
+                  <Button className="w-full bg-linear-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-900 font-bold text-lg py-6 shadow-xl shadow-amber-500/30">
                     <Sparkles className="mr-2 h-5 w-5" />
                     Enviar Consulta
                   </Button>
@@ -1810,29 +1760,104 @@ export default function HomePage() {
       </Section>
 
       {/* Footer */}
-      <footer className="bg-slate-950 text-gray-400 py-12">
+      <footer className="bg-slate-950 text-gray-400 py-16">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="text-center md:text-left">
-              <div className="flex items-center gap-3 justify-center md:justify-start mb-4">
+          <div className="grid md:grid-cols-3 gap-12 mb-12">
+            {/* Logo y eslogan */}
+            <div>
+              <div className="flex items-center gap-3 mb-4">
                 <div className="bg-white p-2 rounded-lg">
                   <Image
                     src={logo}
-                    alt="Gearnifyers"
+                    alt="GutNes Digital"
                     width={40}
                     height={40}
                     className="w-auto h-8"
                   />
                 </div>
-                <span className="text-2xl font-bold text-white">Gutnes</span>
+                <span className="text-2xl font-bold text-white">GutNes Digital</span>
               </div>
-              <p className="text-sm">© {new Date().getFullYear()} Gutnes. Todos los derechos reservados.</p>
+              <p className="text-sm text-gray-400">Tu futuro online en buenas manos</p>
             </div>
-            <div className="flex gap-6 text-sm">
-              <a href="#" className="hover:text-amber-400 transition-colors">Política de Privacidad</a>
-              <a href="#" className="hover:text-amber-400 transition-colors">Términos de Servicio</a>
-              <a href="#" className="hover:text-amber-400 transition-colors">Cookies</a>
+
+            {/* Enlaces */}
+            <div>
+              <h3 className="text-white font-bold mb-4">Navegación</h3>
+              <ul className="space-y-2">
+                <li>
+                  <button 
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className="hover:text-amber-400 transition-colors text-sm"
+                  >
+                    Inicio
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => document.getElementById('servicios')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="hover:text-amber-400 transition-colors text-sm"
+                  >
+                    Servicios
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => document.getElementById('portafolio')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="hover:text-amber-400 transition-colors text-sm"
+                  >
+                    Portfolio
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => document.getElementById('contacto')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="hover:text-amber-400 transition-colors text-sm"
+                  >
+                    Contacto
+                  </button>
+                </li>
+              </ul>
             </div>
+
+            {/* Redes sociales */}
+            <div>
+              <h3 className="text-white font-bold mb-4">Síguenos</h3>
+              <div className="flex gap-4">
+                <a 
+                  href="#" 
+                  className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center hover:bg-amber-500 transition-colors"
+                  aria-label="Facebook"
+                >
+                  <Facebook className="h-5 w-5" />
+                </a>
+                <a 
+                  href="#" 
+                  className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center hover:bg-amber-500 transition-colors"
+                  aria-label="Twitter"
+                >
+                  <Twitter className="h-5 w-5" />
+                </a>
+                <a 
+                  href="#" 
+                  className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center hover:bg-amber-500 transition-colors"
+                  aria-label="LinkedIn"
+                >
+                  <Linkedin className="h-5 w-5" />
+                </a>
+                <a 
+                  href="#" 
+                  className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center hover:bg-amber-500 transition-colors"
+                  aria-label="Instagram"
+                >
+                  <Instagram className="h-5 w-5" />
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Copyright */}
+          <div className="border-t border-slate-800 pt-8 text-center">
+            <p className="text-sm">© 2025 GutNes Digital. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>
@@ -1844,14 +1869,14 @@ export default function HomePage() {
   function renderMultiPage() {
     const pages = {
       inicio: (
-        <section className={`min-h-screen bg-gradient-to-br ${theme.colors.bg} text-white py-20`}>
+        <section className={`min-h-screen bg-linear-to-br ${theme.colors.bg} text-white py-20`}>
           <div className="container mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               className="max-w-4xl mx-auto text-center"
             >
-              <h1 className={`text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r ${theme.colors.primary} bg-clip-text text-transparent`}>
+              <h1 className={`text-6xl md:text-7xl font-bold mb-6 bg-linear-to-r ${theme.colors.primary} bg-clip-text text-transparent`}>
                 Transformamos tu Negocio Digitalmente
               </h1>
               <p className="text-2xl text-gray-300 mb-8 leading-relaxed">
@@ -1860,7 +1885,7 @@ export default function HomePage() {
               <div className="flex gap-4 justify-center flex-wrap">
                 <Button 
                   onClick={() => setCurrentPage('servicios')}
-                  className={`bg-gradient-to-r ${theme.colors.secondary} px-10 py-6 text-lg`}
+                  className={`bg-linear-to-r ${theme.colors.secondary} px-10 py-6 text-lg`}
                 >
                   Ver Servicios <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
@@ -1882,7 +1907,7 @@ export default function HomePage() {
                   { value: 'Ágil', label: 'Entregas' }
                 ].map((stat, i) => (
                   <div key={i} className="text-center">
-                    <div className={`text-4xl font-bold mb-2 bg-gradient-to-r ${theme.colors.primary} bg-clip-text text-transparent`}>
+                    <div className={`text-4xl font-bold mb-2 bg-linear-to-r ${theme.colors.primary} bg-clip-text text-transparent`}>
                       {stat.value}
                     </div>
                     <div className="text-gray-400">{stat.label}</div>
@@ -1944,7 +1969,7 @@ export default function HomePage() {
                   }
                 ].map((service, i) => (
                   <Card key={i} className="p-8 hover:shadow-2xl transition-all group">
-                    <div className={`w-16 h-16 rounded-xl bg-gradient-to-r ${i % 2 === 0 ? theme.colors.primary : theme.colors.secondary} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                    <div className={`w-16 h-16 rounded-xl bg-linear-to-r ${i % 2 === 0 ? theme.colors.primary : theme.colors.secondary} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                       <service.icon className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-2xl font-bold mb-3">{service.title}</h3>
@@ -1982,7 +2007,7 @@ export default function HomePage() {
                 { title: 'Plataforma Educativa', category: 'E-learning', tech: 'Laravel, Vue', image: '📚' }
               ].map((project, i) => (
                 <Card key={i} className="overflow-hidden group cursor-pointer hover:shadow-2xl transition-all">
-                  <div className={`h-56 bg-gradient-to-br ${i % 2 === 0 ? theme.colors.primary : theme.colors.secondary} flex items-center justify-center text-8xl`}>
+                  <div className={`h-56 bg-linear-to-br ${i % 2 === 0 ? theme.colors.primary : theme.colors.secondary} flex items-center justify-center text-8xl`}>
                     {project.image}
                   </div>
                   <div className="p-6">
@@ -2027,7 +2052,7 @@ export default function HomePage() {
                   { icon: Rocket, title: 'Innovación', desc: 'Tecnologías de vanguardia en cada proyecto' }
                 ].map((value, i) => (
                   <Card key={i} className="p-6 text-center">
-                    <div className={`w-16 h-16 rounded-full bg-gradient-to-r ${theme.colors.primary} flex items-center justify-center mx-auto mb-4`}>
+                    <div className={`w-16 h-16 rounded-full bg-linear-to-r ${theme.colors.primary} flex items-center justify-center mx-auto mb-4`}>
                       <value.icon className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-xl font-bold mb-2">{value.title}</h3>
@@ -2071,7 +2096,7 @@ export default function HomePage() {
       ),
       
       contacto: (
-        <section className={`py-16 bg-gradient-to-br ${theme.colors.bg} min-h-screen flex items-center`}>
+        <section className={`py-16 bg-linear-to-br ${theme.colors.bg} min-h-screen flex items-center`}>
           <div className="container mx-auto px-6">
             <div className="max-w-4xl mx-auto">
               <h1 className="text-5xl font-bold text-center mb-6 text-white">Contáctanos</h1>
@@ -2131,7 +2156,7 @@ export default function HomePage() {
                       </div>
                       <Button 
                         onClick={() => setShowSuccessMessage(true)}
-                        className={`w-full bg-gradient-to-r ${theme.colors.secondary} text-white py-6 text-lg`}
+                        className={`w-full bg-linear-to-r ${theme.colors.secondary} text-white py-6 text-lg`}
                       >
                         <Send className="mr-2 h-5 w-5" />
                         Enviar Mensaje
@@ -2144,7 +2169,7 @@ export default function HomePage() {
                   <Card className="p-6 bg-white/10 backdrop-blur border-white/20">
                     <Mail className="h-8 w-8 mb-4 text-amber-400" />
                     <h3 className="text-lg font-bold mb-2">Email</h3>
-                    <p className="text-gray-300">hola@gutnes.com</p>
+                    <p className="text-gray-300">info@gutnes.es</p>
                   </Card>
                   <Card className="p-6 bg-white/10 backdrop-blur border-white/20">
                     <Phone className="h-8 w-8 mb-4 text-amber-400" />
@@ -2172,7 +2197,7 @@ export default function HomePage() {
     return (
       <>
         {/* Header con Navegación */}
-        <header className={`sticky top-0 z-40 bg-gradient-to-r ${theme.colors.bg} border-b border-white/10 backdrop-blur-lg shadow-lg`}>
+        <header className={`sticky top-0 z-40 bg-linear-to-r ${theme.colors.bg} border-b border-white/10 backdrop-blur-lg shadow-lg`}>
           <div className="container mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
               <Image src={logo} alt="Gutnes Logo" width={120} height={40} className="w-auto h-10 cursor-pointer" onClick={() => setCurrentPage('inicio')} />
@@ -2188,7 +2213,7 @@ export default function HomePage() {
                 ))}
                 <Button 
                   onClick={() => setCurrentPage('contacto')}
-                  className={`bg-gradient-to-r ${theme.colors.secondary} text-white`}
+                  className={`bg-linear-to-r ${theme.colors.secondary} text-white`}
                 >
                   Contacto
                 </Button>
@@ -2269,7 +2294,7 @@ export default function HomePage() {
     return (
       <>
         {/* Header Tienda */}
-        <header className={`bg-gradient-to-r ${theme.colors.bg} text-white py-4`}>
+        <header className={`bg-linear-to-r ${theme.colors.bg} text-white py-4`}>
           <div className="container mx-auto px-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-8">
@@ -2322,7 +2347,7 @@ export default function HomePage() {
                     </span>
                   )}
                   <h3 className="text-2xl font-bold mb-2">{pkg.name}</h3>
-                  <p className={`text-3xl font-bold mb-6 bg-gradient-to-r ${theme.colors.primary} bg-clip-text text-transparent`}>{pkg.price}</p>
+                  <p className={`text-3xl font-bold mb-6 bg-linear-to-r ${theme.colors.primary} bg-clip-text text-transparent`}>{pkg.price}</p>
                   <ul className="space-y-3 mb-8">
                     {pkg.features.map((feature, j) => (
                       <li key={j} className="flex items-center gap-2 text-sm">
@@ -2331,7 +2356,7 @@ export default function HomePage() {
                       </li>
                     ))}
                   </ul>
-                  <Button className={`w-full ${pkg.popular ? `bg-gradient-to-r ${theme.colors.secondary}` : ''}`}>
+                  <Button className={`w-full ${pkg.popular ? `bg-linear-to-r ${theme.colors.secondary}` : ''}`}>
                     Agregar al Carrito
                   </Button>
                 </Card>
@@ -2354,13 +2379,13 @@ export default function HomePage() {
     return (
       <>
         {/* Hero Portfolio */}
-        <section className={`py-24 bg-gradient-to-br ${theme.colors.bg} text-white`}>
+        <section className={`py-24 bg-linear-to-br ${theme.colors.bg} text-white`}>
           <div className="container mx-auto px-6 text-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <h1 className={`text-6xl font-bold mb-6 bg-gradient-to-r ${theme.colors.primary} bg-clip-text text-transparent`}>
+              <h1 className={`text-6xl font-bold mb-6 bg-linear-to-r ${theme.colors.primary} bg-clip-text text-transparent`}>
                 Nuestro Portfolio
               </h1>
               <p className="text-xl text-gray-300 max-w-2xl mx-auto">
@@ -2383,7 +2408,7 @@ export default function HomePage() {
                 { title: 'Plataforma Educativa', category: 'E-learning', tech: 'Laravel, Vue' }
               ].map((project, i) => (
                 <Card key={i} className="overflow-hidden group cursor-pointer hover:shadow-2xl transition-all">
-                  <div className={`h-48 bg-gradient-to-br ${i % 2 === 0 ? theme.colors.primary : theme.colors.secondary} flex items-center justify-center`}>
+                  <div className={`h-48 bg-linear-to-br ${i % 2 === 0 ? theme.colors.primary : theme.colors.secondary} flex items-center justify-center`}>
                     <Code className="h-20 w-20 text-white/20" />
                   </div>
                   <div className="p-6">
@@ -2411,7 +2436,7 @@ export default function HomePage() {
     return (
       <>
         {/* Header Blog */}
-        <header className={`bg-gradient-to-r ${theme.colors.bg} text-white py-6`}>
+        <header className={`bg-linear-to-r ${theme.colors.bg} text-white py-6`}>
           <div className="container mx-auto px-6">
             <div className="flex items-center justify-between">
               <div>
@@ -2432,7 +2457,7 @@ export default function HomePage() {
               {/* Artículo Principal */}
               <Card className="md:col-span-2 overflow-hidden">
                 <div className="grid md:grid-cols-2">
-                  <div className={`h-64 md:h-auto bg-gradient-to-br ${theme.colors.primary} flex items-center justify-center`}>
+                  <div className={`h-64 md:h-auto bg-linear-to-br ${theme.colors.primary} flex items-center justify-center`}>
                     <BookOpen className="h-32 w-32 text-white/20" />
                   </div>
                   <div className="p-8">
@@ -2490,7 +2515,7 @@ export default function HomePage() {
       <>
         <div className="flex h-screen">
           {/* Sidebar */}
-          <aside className={`w-64 bg-gradient-to-b ${theme.colors.bg} text-white p-6`}>
+          <aside className={`w-64 bg-linear-to-b ${theme.colors.bg} text-white p-6`}>
             <div className="mb-8">
               <Image src={logo} alt="Gutnes Logo" width={100} height={35} className="w-auto h-9" />
               <p className="text-xs text-gray-400 mt-2">Panel de Control</p>
@@ -2517,7 +2542,7 @@ export default function HomePage() {
             <header className="bg-white border-b px-8 py-4">
               <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold">Dashboard Principal</h1>
-                <Button className={`bg-gradient-to-r ${theme.colors.secondary}`}>Nuevo Proyecto</Button>
+                <Button className={`bg-linear-to-r ${theme.colors.secondary}`}>Nuevo Proyecto</Button>
               </div>
             </header>
 
@@ -2533,7 +2558,7 @@ export default function HomePage() {
                   <Card key={i} className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <stat.icon className={`h-8 w-8 text-${stat.color}-500`} />
-                      <span className={`text-3xl font-bold bg-gradient-to-r ${theme.colors.primary} bg-clip-text text-transparent`}>
+                      <span className={`text-3xl font-bold bg-linear-to-r ${theme.colors.primary} bg-clip-text text-transparent`}>
                         {stat.value}
                       </span>
                     </div>
@@ -2557,7 +2582,7 @@ export default function HomePage() {
                         <span className="text-sm text-gray-500">{project.status}</span>
                       </div>
                       <div className="w-full bg-slate-200 rounded-full h-2">
-                        <div className={`bg-gradient-to-r ${theme.colors.secondary} h-2 rounded-full`} style={{ width: `${project.progress}%` }} />
+                        <div className={`bg-linear-to-r ${theme.colors.secondary} h-2 rounded-full`} style={{ width: `${project.progress}%` }} />
                       </div>
                     </div>
                   ))}
@@ -2577,12 +2602,12 @@ export default function HomePage() {
     return (
       <>
         {/* Hero con Tabs */}
-        <section className={`min-h-screen bg-gradient-to-br ${theme.colors.bg}`}>
+        <section className={`min-h-screen bg-linear-to-br ${theme.colors.bg}`}>
           <div className="container mx-auto px-6 py-12">
             {/* Header */}
             <div className="text-center mb-12">
               <Image src={logo} alt="Gutnes Logo" width={150} height={50} className="w-auto h-14 mx-auto mb-6" />
-              <h1 className={`text-5xl font-bold mb-4 bg-gradient-to-r ${theme.colors.primary} bg-clip-text text-transparent`}>
+              <h1 className={`text-5xl font-bold mb-4 bg-linear-to-r ${theme.colors.primary} bg-clip-text text-transparent`}>
                 Gutnes Digital
               </h1>
               <p className="text-xl text-gray-300">Tu Futuro Online en Buenas Manos</p>
@@ -2601,7 +2626,7 @@ export default function HomePage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
                     activeTab === tab.id
-                      ? `bg-gradient-to-r ${theme.colors.secondary} text-white shadow-lg`
+                      ? `bg-linear-to-r ${theme.colors.secondary} text-white shadow-lg`
                       : 'bg-white/10 text-white hover:bg-white/20'
                   }`}
                 >
@@ -2655,7 +2680,7 @@ export default function HomePage() {
                   <div className="grid md:grid-cols-3 gap-6">
                     {['Desarrollo', 'Diseño', 'Marketing'].map((dept, i) => (
                       <div key={i} className="text-center p-6 bg-slate-50 rounded-lg">
-                        <div className={`w-20 h-20 rounded-full bg-gradient-to-r ${theme.colors.primary} mx-auto mb-4`} />
+                        <div className={`w-20 h-20 rounded-full bg-linear-to-r ${theme.colors.primary} mx-auto mb-4`} />
                         <h3 className="font-bold">{dept}</h3>
                       </div>
                     ))}
@@ -2676,7 +2701,7 @@ export default function HomePage() {
                         <Phone className="h-5 w-5 text-amber-500" />
                         <span>+34 123 456 789</span>
                       </div>
-                      <Button className={`w-full mt-6 bg-gradient-to-r ${theme.colors.secondary} text-white`}>
+                      <Button className={`w-full mt-6 bg-linear-to-r ${theme.colors.secondary} text-white`}>
                         Enviar Mensaje
                       </Button>
                     </div>

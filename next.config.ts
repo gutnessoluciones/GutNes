@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Comentado para Vercel - descomentarexport para FTP
+  // output: 'export',
+  images: {
+    unoptimized: true
+  }
 };
 
 export default nextConfig;

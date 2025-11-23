@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy": "npm run build && echo '\n✅ Build completo. Sube la carpeta out/ vía FTP'",
+    "preview": "npm run build && npx serve out"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
