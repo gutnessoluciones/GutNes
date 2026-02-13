@@ -6,10 +6,8 @@ import { motion, useInView, useScroll, useTransform, AnimatePresence } from 'fra
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import logo from '@/images/logo.png';
-import ambondapp from '@/images/ambondapp.png';
-import cuevasanita from '@/images/cuevasanita.png';
-import vivo from '@/images/vivo.png';
 import { findBestResponse } from '@/data/chatbotKnowledge';
+import CookieBanner from '@/components/CookieBanner';
 import {
   Globe,
   Search,
@@ -156,24 +154,20 @@ export default function HomePage() {
     }
   ];
 
-  const portafolio = [
+    const portafolio = [
     {
-      name: "Polvero el Vivo",
-      category: "Construcción",
-      description: "Landing page moderna para almacén de materiales de construcción con más de 60 años de experiencia",
-      image: vivo
+      name: "Joyeria Cerquera",
+      category: "Joyeria",
+      description: "Tienda online elegante para joyeria artesanal con diseno sofisticado y catalogo de productos exclusivos",
+      image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&h=400&fit=crop",
+      url: "https://www.joyeriacerquera.es"
     },
     {
-      name: "AmBondApp",
-      category: "Gestión de Bandas",
-      description: "Sistema de Gestión Integral para bandas de música. Gestión completa de uniformidad, stock de instrumentos, actuaciones, cuentas, partituras y administración",
-      image: ambondapp
-    },
-    {
-      name: "Cuevas de Anita",
-      category: "Restaurante",
-      description: "Web para restaurante tradicional especializado en cocina casera y eventos. Diseño moderno que refleja la calidez del establecimiento",
-      image: cuevasanita
+      name: "Aluria Modas",
+      category: "Moda",
+      description: "E-commerce de moda con diseno moderno, catalogo dinamico y experiencia de compra optimizada",
+      image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=400&fit=crop",
+      url: "https://aluriamodas.es"
     }
   ];
 
@@ -476,6 +470,9 @@ export default function HomePage() {
       
       {/* Floating Buttons - Siempre visibles */}
       {renderFloatingButtons()}
+      
+      {/* Cookie Banner */}
+      <CookieBanner />
     </div>
   );
 
@@ -1523,7 +1520,7 @@ export default function HomePage() {
             </div>
           </AnimatedContent>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {services.map((service, index) => (
               <AnimatedCard key={index} delay={index * 0.1}>
                 <Card className="p-8 h-full hover:shadow-2xl transition-all duration-300 border-2 hover:border-amber-400 group">
@@ -1561,37 +1558,38 @@ export default function HomePage() {
             </div>
           </AnimatedContent>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {portafolio.map((project, index) => (
               <AnimatedCard key={index} delay={index * 0.15}>
-                <Card className="overflow-hidden h-full hover:shadow-2xl transition-all duration-300 group">
-                  <div className="relative h-48 overflow-hidden">
-                    {typeof project.image === 'string' ? (
+                <a href={project.url} target="_blank" rel="noopener noreferrer" className="block h-full">
+                  <Card className="overflow-hidden h-full hover:shadow-2xl transition-all duration-300 group cursor-pointer">
+                    <div className="relative h-48 overflow-hidden">
                       <img
                         src={project.image}
                         alt={project.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
-                    ) : (
-                      <Image
-                        src={project.image}
-                        alt={project.name}
-                        fill
-                        className="object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-linear-to-t from-slate-900/80 to-transparent" />
-                    <div className="absolute bottom-4 left-4">
-                      <span className="px-3 py-1 bg-linear-to-r from-amber-500 to-yellow-500 text-slate-900 text-sm font-bold rounded-full shadow-lg">
-                        {project.category}
+                      <div className="absolute inset-0 bg-linear-to-t from-slate-900/80 to-transparent" />
+                      <div className="absolute bottom-4 left-4">
+                        <span className="px-3 py-1 bg-linear-to-r from-amber-500 to-yellow-500 text-slate-900 text-sm font-bold rounded-full shadow-lg">
+                          {project.category}
+                        </span>
+                      </div>
+                      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="px-3 py-1 bg-white/90 text-slate-900 text-sm font-semibold rounded-full shadow-lg flex items-center gap-1">
+                          Visitar web
+                        </span>
+                      </div>
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-amber-600 transition-colors">{project.name}</h3>
+                      <p className="text-slate-600 mb-3">{project.description}</p>
+                      <span className="inline-flex items-center text-amber-600 font-semibold text-sm">
+                        Ver proyecto →
                       </span>
                     </div>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">{project.name}</h3>
-                    <p className="text-slate-600">{project.description}</p>
-                  </div>
-                </Card>
+                  </Card>
+                </a>
               </AnimatedCard>
             ))}
           </div>
@@ -2041,7 +2039,7 @@ export default function HomePage() {
               <h1 className="text-5xl font-bold text-center mb-4">Nuestros Servicios</h1>
               <p className="text-center text-gray-600 mb-12 text-lg">Soluciones digitales a medida para tu empresa</p>
               
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                 {[
                   { 
                     icon: Code, 
@@ -2109,7 +2107,7 @@ export default function HomePage() {
             <h1 className="text-5xl font-bold text-center mb-4">Portfolio</h1>
             <p className="text-center text-gray-600 mb-12 text-lg">Proyectos que transformaron negocios</p>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               {[
                 { title: 'Polvero el Vivo', category: 'E-commerce', tech: 'Next.js, Stripe', image: '🎸' },
                 { title: 'ERP Corporativo', category: 'Sistema Web', tech: 'React, Node.js', image: '📊' },
@@ -2510,7 +2508,7 @@ export default function HomePage() {
         {/* Galería de Proyectos */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               {[
                 { title: 'Polvero el Vivo', category: 'E-commerce', tech: 'Next.js, Stripe' },
                 { title: 'ERP Corporativo', category: 'Sistema Web', tech: 'React, Node.js' },
