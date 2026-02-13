@@ -159,14 +159,14 @@ export default function HomePage() {
       name: "Joyeria Cerquera",
       category: "Joyeria",
       description: "Tienda online elegante para joyeria artesanal con diseno sofisticado y catalogo de productos exclusivos",
-      image: "https://image.thum.io/get/width/1280/crop/800/wait/3/https://www.joyeriacerquera.es",
+      image: "/joyeriacerquera.png",
       url: "https://www.joyeriacerquera.es"
     },
     {
       name: "Aluria Modas",
       category: "Moda",
       description: "E-commerce de moda con diseno moderno, catalogo dinamico y experiencia de compra optimizada",
-      image: "https://image.thum.io/get/width/1280/crop/800/wait/3/https://aluriamodas.es",
+      image: "/aluriamodas.png",
       url: "https://aluriamodas.es"
     }
   ];
